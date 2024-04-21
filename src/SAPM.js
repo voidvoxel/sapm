@@ -48,6 +48,43 @@ const path = require('path');
  */
 class SAPM extends PluginManager {
     /**
+     * The current working directory of this `SAPM` instance.
+     *
+     * @type {string}
+     * @private
+     * @since v0.1.0-alpha
+     */
+    #cwd
+
+    /**
+     * The path to install dependencies into.
+     * Normally, this is set to `node_modules`.
+     *
+     * @type {string}
+     * @private
+     * @since v0.1.0-alpha
+     */
+    #installPath
+
+    /**
+     * A list of all currently loaded dependencies.
+     *
+     * @type {*[]}
+     * @private
+     * @since v0.1.0-alpha
+     */
+    #loaded
+
+    /**
+     * The `PackageJSON` associated with this package.
+     *
+     * @type {PackageJSON}
+     * @private
+     * @since v0.1.0-alpha
+     */
+    #packageJSON
+
+    /**
      * Create a new `SAPM` instance.
      *
      * @since v0.1.0-alpha
@@ -94,25 +131,25 @@ class SAPM extends PluginManager {
         super(options);
 
         // Update our reference to the current working directory.
-        this._cd(cwd);
+        this.#cd(cwd);
 
         // Set the install path (where packages are installed).
         // This is normally set to `node_modules`.
-        this._setInstallPath(options.installPath);
+        this.#setInstallPath(options.installPath);
 
         // Initialize the loaded package map.
-        this._loaded = {};
+        this.#loaded = {};
 
         // If the `package.json` file already exists, load it.
         // Otherwise, create a new one from the little knowledge we have.
         if (PackageJSON.existsSync(cwd)) {
             // Load the `package.json` file from the given path.
             // TODO: Call `await PackageJSON.readFile(...)` instead.
-            this._packageJSON = PackageJSON.readFileSync(cwd);
+            this.#packageJSON = PackageJSON.readFileSync(cwd);
         } else {
             // Create a template `package.json` to get the user started if none
             // already exists in the given package directory.
-            this._packageJSON = PackageJSON.from(
+            this.#packageJSON = PackageJSON.from(
                 {
                     name: defaultPackageName,
                     version: PackageJSON.default().version,
@@ -142,7 +179,7 @@ class SAPM extends PluginManager {
         version,
         mode
     ) {
-        const dependencyNames = Object.keys(this._packageJSON.dependencies);
+        const dependencyNames = Object.keys(this.#packageJSON.dependencies);
 
         if (dependencyNames.includes(name)) {
             // TODO: Ensure the correct symver requirement is met.
@@ -161,7 +198,7 @@ class SAPM extends PluginManager {
      * The path to the current working directory.
      */
     cwd () {
-        return this._cwd;
+        return this.#cwd;
     }
 
 
@@ -173,7 +210,7 @@ class SAPM extends PluginManager {
      * The path to `node_modules`.
      */
     getInstallPath () {
-        return this._installPath;
+        return this.#installPath;
     }
 
 
@@ -185,7 +222,7 @@ class SAPM extends PluginManager {
      * The name of the package.
      */
     getPackageName () {
-        return this._packageJSON.name;
+        return this.#packageJSON.name;
     }
 
 
@@ -198,7 +235,7 @@ class SAPM extends PluginManager {
      */
     async install (...packageNames) {
         for (let packageName of packageNames) {
-            await this._installPackage(packageName);
+            await this.#installPackage(packageName);
         }
     }
 
@@ -211,7 +248,7 @@ class SAPM extends PluginManager {
      * A list of all loaded packages.
      */
     loaded () {
-        return { ...this._loaded };
+        return { ...this.#loaded };
     }
 
 
@@ -223,7 +260,7 @@ class SAPM extends PluginManager {
      * The `package.json` file associated with this package.
      */
     packageJSON () {
-        return this._packageJSON;
+        return this.#packageJSON;
     }
 
 
@@ -236,7 +273,7 @@ class SAPM extends PluginManager {
      * The name of the package to add as a dependency.
      * @private
      */
-    async _addDependency (
+    async #addDependency (
         packageName,
         version
     ) {
@@ -270,8 +307,8 @@ class SAPM extends PluginManager {
      * @param {string} dir
      * The directory to change to.
      */
-    _cd (dir) {
-        this._cwd = dir;
+    #cd (dir) {
+        this.#cwd = dir;
     }
 
 
@@ -287,7 +324,7 @@ class SAPM extends PluginManager {
      * The version that this sapm decides on must be compatible with the
      * version that you're trying to install.
      */
-    async _installPackage (
+    async #installPackage (
         packageName,
         version = null
     ) {
@@ -317,14 +354,14 @@ class SAPM extends PluginManager {
                 version
             );
 
-            await this._addDependency(
+            await this.#addDependency(
                 packageName,
                 version
             );
         } else {
             await super.install(packageName);
 
-            await this._addDependency(packageName);
+            await this.#addDependency(packageName);
         }
     }
 
@@ -337,11 +374,11 @@ class SAPM extends PluginManager {
      * @private
      * @since v0.1.0-alpha
      */
-    _loadAllDependencies () {
-        const dependencyMap = this._packageJSON.dependencies;
+    #loadAllDependencies () {
+        const dependencyMap = this.#packageJSON.dependencies;
 
         for (let name in dependencyMap) {
-            this._loadDependency(name);
+            this.#loadDependency(name);
         }
     }
 
@@ -358,14 +395,14 @@ class SAPM extends PluginManager {
      * @returns
      * The loaded dependency.
      */
-    _loadDependency (
+    #loadDependency (
         name
     ) {
-        if (typeof this._loaded[name] === 'object') {
-            return this._loaded[name];
+        if (typeof this.#loaded[name] === 'object') {
+            return this.#loaded[name];
         }
 
-        return this._loaded[name] = super.require(name);
+        return this.#loaded[name] = super.require(name);
     }
 
 
@@ -377,8 +414,8 @@ class SAPM extends PluginManager {
      * @since v0.1.0-alpha
      * @param {string} installPath
      */
-    _setInstallPath (installPath) {
-        this._installPath = installPath;
+    #setInstallPath (installPath) {
+        this.#installPath = installPath;
     }
 }
 
