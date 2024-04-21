@@ -178,6 +178,11 @@ class SAPM extends PluginManager {
     }
 
 
+    /**
+     * Install one or more dependencies.
+     * @param  {...any} packageNames
+     * A list of all dependencies to install.
+     */
     async install (...packageNames) {
         for (let packageName of packageNames) {
             await this._installPackage(packageName);
@@ -185,11 +190,21 @@ class SAPM extends PluginManager {
     }
 
 
+    /**
+     * Get a list of all packages currently loaded into memory.
+     * @returns {*[]}
+     * A list of all loaded packages.
+     */
     loaded () {
         return { ...this._loaded };
     }
 
 
+    /**
+     * Get the `package.json` file associated with this package.
+     * @returns {PackageJSON}
+     * The `package.json` file associated with this package.
+     */
     packageJSON () {
         return this._packageJSON;
     }
