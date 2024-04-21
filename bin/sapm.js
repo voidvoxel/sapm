@@ -49,6 +49,7 @@ function logUsage () {
 
     logSubcommandUsage('help');
     logSubcommandUsage('install');
+    logSubcommandUsage('uninstall');
     logSubcommandUsage('test');
     logSubcommandUsage('run');
 
@@ -66,16 +67,22 @@ function logSubcommandUsage (subcommand) {
             break;
 
         case 'install':
-            console.log("sapm install        Install all of the dependencies in your project.");
-            console.log("sapm install <foo>  Add the dependency <foo> to your project.");
+            console.log("sapm install           Install all of the dependencies in your project.");
+            console.log("sapm install <foo>     Add the dependency <foo> to your project.");
+            break;
+
+        case 'un':
+        case 'uninstall':
+            console.log("sapm uninstall         Uninstall all of the dependencies in your project.");
+            console.log("sapm uninstall <foo>   Remove the dependency <foo> from your project.");
             break;
 
         case 'test':
-            console.log("sapm test           Run any tests for this project.");
+            console.log("sapm test              Run any tests for this project.");
             break;
 
         case 'run':
-            console.log("sapm run <foo>      Run the script named <foo>,");
+            console.log("sapm run <foo>         Run the script named <foo>,");
             break;
     }
 }
