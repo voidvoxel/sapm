@@ -12,6 +12,11 @@ let sapm = null;
 
 
 const PARSE_ARGS_OPTIONS = {
+    'help': {
+        type: 'boolean',
+        short: 'h',
+        default: false
+    },
     'package-lock-only': {
         type: 'boolean',
         default: false
@@ -148,6 +153,12 @@ async function runSubcommand (
     subcommand,
     args
 ) {
+    if (args.values['help']) {
+        subcommand = 'help';
+    } else if (args.values['usage']) {
+        subcommand = 'usage';
+    }
+
     switch (subcommand) {
         default: {
             logUsage();
