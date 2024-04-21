@@ -200,6 +200,11 @@ class SAPM extends PluginManager {
     }
 
 
+    /**
+     * Get the `package.json` file associated with this package.
+     * @returns {PackageJSON}
+     * The `package.json` file associated with this package.
+     */
     packageJSON () {
         return this._packageJSON;
     }
