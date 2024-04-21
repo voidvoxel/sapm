@@ -1,6 +1,9 @@
 const { parseArgs } = require('util');
 
 
+const SAPM = require('..');
+
+
 const PARSE_ARGS_OPTIONS = {
     'save-dev': {
         type: 'boolean',
@@ -75,6 +78,43 @@ function logSubcommandUsage (subcommand) {
 }
 
 
+async function install (
+    options,
+    ...packageNames
+) {
+    const sapm = new SAPM();
+
+    sapm.install(...packageNames);
+}
+
+
+async function runSubcommand (
+    subcommand,
+    args
+) {
+    switch (subcommand) {
+        default: {
+            logUsage();
+
+            return;
+        }
+
+        case 'i':
+        case 'install': {
+            const options = args.options;
+            const packageNames = args.positionals;
+
+            await install(
+                options,
+                ...packageNames
+            );
+
+            return;
+        }
+    }
+}
+
+
 async function main (args) {
     if (args.positionals.length === 0) {
         logUsage();
@@ -83,6 +123,13 @@ async function main (args) {
     }
 
     const subcommand = args.positionals[0];
+
+    args.positionals = args.positionals.splice(1);
+
+    await runSubcommand(
+        subcommand,
+        args
+    );
 }
 
 
