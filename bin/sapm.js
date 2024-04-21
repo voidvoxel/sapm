@@ -65,6 +65,7 @@ function logSubcommandUsage (subcommand) {
             console.log("sapm help           help and usage");
             break;
 
+        case 'i':
         case 'install':
             console.log("sapm install        Install all of the dependencies in your project.");
             console.log("sapm install <foo>  Add the dependency <foo> to your project.");
