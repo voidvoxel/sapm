@@ -7,7 +7,7 @@
     "sapm": "bin/sapm.js"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest && rm -rf tmp"
   },
   "keywords": [
     "npm",
