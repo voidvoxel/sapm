@@ -44,10 +44,13 @@ const path = require('path');
  * For more information, please refer to
  * [the README file](https://github.com/voidvoxel/sapm)
  * .
+ * @since v0.1.0-alpha
  */
 class SAPM extends PluginManager {
     /**
+     * Create a new `SAPM` instance.
      *
+     * @since v0.1.0-alpha
      * @param {string} packagePath
      * The path to either the package directory or `package.json` file.
      * @param {*} options
@@ -123,6 +126,8 @@ class SAPM extends PluginManager {
     /**
      * If version `version` of `name` is met, returns `true`.
      * Returns `false` in all other cases.
+     *
+     * @since v0.1.0-alpha
      * @param {string} name
      * The name of the package that you would like to test for.
      * @param {string} version
@@ -150,6 +155,8 @@ class SAPM extends PluginManager {
 
     /**
      * Get the path to the current working directory.
+     *
+     * @since v0.1.0-alpha
      * @returns {string}
      * The path to the current working directory.
      */
@@ -160,16 +167,20 @@ class SAPM extends PluginManager {
 
     /**
      * Get the path to the `node_modules` directory.
+     *
+     * @since v0.1.0-alpha
      * @returns {string}
      * The path to `node_modules`.
      */
     getInstallPath () {
-        return this._nodeModulesPath;
+        return this._installPath;
     }
 
 
     /**
      * Get the name of the package being modified.
+     *
+     * @since v0.1.0-alpha
      * @returns {string}
      * The name of the package.
      */
@@ -180,6 +191,8 @@ class SAPM extends PluginManager {
 
     /**
      * Install one or more dependencies.
+     *
+     * @since v0.1.0-alpha
      * @param  {...any} packageNames
      * A list of all dependencies to install.
      */
@@ -192,6 +205,8 @@ class SAPM extends PluginManager {
 
     /**
      * Get a list of all packages currently loaded into memory.
+     *
+     * @since v0.1.0-alpha
      * @returns {*[]}
      * A list of all loaded packages.
      */
@@ -202,6 +217,8 @@ class SAPM extends PluginManager {
 
     /**
      * Get the `package.json` file associated with this package.
+     *
+     * @since v0.1.0-alpha
      * @returns {PackageJSON}
      * The `package.json` file associated with this package.
      */
@@ -212,6 +229,9 @@ class SAPM extends PluginManager {
 
     /**
      * Add a package as a dependency.
+     *
+     * @private
+     * @since v0.1.0-alpha
      * @param {string} packageName
      * The name of the package to add as a dependency.
      * @private
@@ -242,11 +262,31 @@ class SAPM extends PluginManager {
     }
 
 
+    /**
+     * Change the current working directory of this `SAPM` instance.
+     *
+     * @private
+     * @since v0.1.0-alpha
+     * @param {string} dir
+     * The directory to change to.
+     */
     _cd (dir) {
         this._cwd = dir;
     }
 
 
+    /**
+     * Install a single package as a dependency.
+     *
+     * @private
+     * @since v0.1.0-alpha
+     * @param {string} packageName
+     * The name of the package.
+     * @param {string?} version
+     * The earliest required version of the package.
+     * The version that this sapm decides on must be compatible with the
+     * version that you're trying to install.
+     */
     async _installPackage (
         packageName,
         version = null
@@ -289,6 +329,14 @@ class SAPM extends PluginManager {
     }
 
 
+    /**
+     * WARNING: Predicted to cause performance overhead if used at runtime.
+     *
+     * Load all of the package's dependencies at once.
+     *
+     * @private
+     * @since v0.1.0-alpha
+     */
     _loadAllDependencies () {
         const dependencyMap = this._packageJSON.dependencies;
 
@@ -298,6 +346,18 @@ class SAPM extends PluginManager {
     }
 
 
+    /**
+     * Load a single installed dependency.
+     * The dependency must already be installed,
+     * or this method will throw an error.
+     *
+     * @private
+     * @since v0.1.0-alpha
+     * @param {string} name
+     * The name of the dependency to load.
+     * @returns
+     * The loaded dependency.
+     */
     _loadDependency (
         name
     ) {
@@ -309,8 +369,16 @@ class SAPM extends PluginManager {
     }
 
 
-    _setInstallPath (nodeModulesPath) {
-        this._nodeModulesPath = nodeModulesPath;
+    /**
+     * Set the path to install packages into
+     * (Usually, this is `node_modules`).
+     *
+     * @private
+     * @since v0.1.0-alpha
+     * @param {string} installPath
+     */
+    _setInstallPath (installPath) {
+        this._installPath = installPath;
     }
 }
 
