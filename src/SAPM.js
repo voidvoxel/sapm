@@ -3,22 +3,73 @@ const PackageJSON = require('./PackageJSON');
 const path = require('path');
 
 
+/**
+ * `sapm` (Silver Ant Package Manager) is a package manager designed to allow
+ * publishing and sharing code across a decentralized network.
+ *
+ * The `SAPM` class contains everything needed to use
+ * the Silver Ant Package Manager as a drop-in replacement for `npm`,
+ * including support for 100% programmatic usage if desired; no CLI necessary.
+ *
+ * To get started, simply pass the path to the root directory of the JavaScript
+ * package that you would like to modify.
+ * For example, to modify a package located at
+ * `./Documents/GitHub/my-lovely-app/package.json`,
+ * run the following code:
+ *
+ * ```js
+ * const sapm = new SAPM("./Documents/GitHub/my-lovely-app");
+ * ```
+ *
+ * or
+ *
+ * ```js
+ * const sapm = new SAPM("./Documents/GitHub/my-lovely-app/package.json");
+ * ```
+ *
+ * Then, to install a few packages, run:
+ *
+ * ```js
+ * await sapm.install('moment', 'block-storage', 'zerda.js');
+ * ```
+ *
+ * or
+ *
+ * ```js
+ * const packageNames = [ 'moment', 'block-storage', 'zerda.js' ];
+ *
+ * await sapm.install(...packageNames);
+ * ```
+ *
+ * For more information, please refer to
+ * [the README file](https://github.com/voidvoxel/sapm)
+ * .
+ */
 class SAPM extends PluginManager {
+    /**
+     *
+     * @param {string} packagePath
+     * The path to either the package directory or `package.json` file.
+     * @param {*} options
+     */
     constructor (
         packagePath,
         options = {}
     ) {
+        // If the `package.json` path was given, trim it down to the directory.
         if (packagePath.endsWith('package.json')) {
             packagePath = path.dirname(packagePath);
         }
 
+        // If no package path was provided, use the current working directory.
         options.cwd = packagePath ??= process.cwd();
 
         const cwd = options.cwd;
 
+        // Resolve the install path
         options.installPath ??= path.resolve(
             path.join(
-                options.cwd,
+                cwd,
                 'node_modules'
             )
         );
@@ -27,24 +78,37 @@ class SAPM extends PluginManager {
 
         delete options.installPath;
 
+        // Parse the default package name from the package path if none was
+        // provided.
         let defaultPackageName = packagePath
             .replace('\\', '/')
             .split('/');
 
+        // Use the name of the current working directory as the package name.
         defaultPackageName = defaultPackageName[defaultPackageName.length - 1];
 
+        // Invoke the super constructor.
         super(options);
 
-        this.cd(cwd);
+        // Update our reference to the current working directory.
+        this._cd(cwd);
 
+        // Set the install path (where packages are installed).
+        // This is normally set to `node_modules`.
         this._setInstallPath(options.installPath);
 
+        // Initialize the loaded package map.
         this._installed = {};
 
+        // If the `package.json` file already exists, load it.
+        // Otherwise, create a new one from the little knowledge we have.
         if (PackageJSON.existsSync(cwd)) {
+            // Load the `package.json` file from the given path.
             // TODO: Call `await PackageJSON.readFile(...)` instead.
             this._packageJSON = PackageJSON.readFileSync(cwd);
         } else {
+            // Create a template `package.json` to get the user started if none
+            // already exists in the given package directory.
             this._packageJSON = PackageJSON.from(
                 {
                     name: defaultPackageName,
@@ -73,18 +137,14 @@ class SAPM extends PluginManager {
         version,
         mode
     ) {
-        return typeof super.alreadyInstalled(
-            name,
-            version,
-            mode
-        ) === 'object'
-            || this._installed[name] === 'object'
-            || false;
-    }
+        const dependencyNames = Object.keys(this._packageJSON.dependencies);
 
+        if (dependencyNames.includes(name)) {
+            // TODO: Ensure the correct symver requirement is met.
+            return true;
+        }
 
-    cd (dir) {
-        this._cwd = dir;
+        return false;
     }
 
 
@@ -132,6 +192,11 @@ class SAPM extends PluginManager {
 
     installed () {
         return { ...this._installed };
+    }
+
+
+    _cd (dir) {
+        this._cwd = dir;
     }
 
 
