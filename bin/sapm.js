@@ -82,7 +82,7 @@ async function install (
     options,
     ...packageNames
 ) {
-    const sapm = new SAPM();
+    const sapm = new SAPM({ nodeModulesPath: 'plugins' });
 
     sapm.install(...packageNames);
 }
