@@ -1,6 +1,6 @@
 {
   "name": "sapm",
-  "version": "0.1.0-alpha",
+  "version": "0.1.0-alpha.1",
   "description": "Silver Ant Package Manager | Distributed package manager for JavaScript",
   "main": "src/index.js",
   "bin": {
