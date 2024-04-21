@@ -33,8 +33,6 @@ class SAPM extends PluginManager {
 
         defaultPackageName = defaultPackageName[defaultPackageName.length - 1];
 
-        console.log(defaultPackageName);
-
         super(options);
 
         this.cd(cwd);
