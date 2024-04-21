@@ -91,6 +91,16 @@ async function install (
 }
 
 
+async function uninstall (
+    options,
+    ...packageNames
+) {
+    const sapm = new SAPM({ nodeModulesPath: 'plugins' });
+
+    await sapm.uninstall(...packageNames);
+}
+
+
 async function runSubcommand (
     subcommand,
     args
@@ -108,6 +118,19 @@ async function runSubcommand (
             const packageNames = args.positionals;
 
             await install(
+                options,
+                ...packageNames
+            );
+
+            return;
+        }
+
+        case 'un':
+        case 'uninstall': {
+            const options = args.options;
+            const packageNames = args.positionals;
+
+            await uninstall(
                 options,
                 ...packageNames
             );
