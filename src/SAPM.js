@@ -309,7 +309,7 @@ class SAPM extends PluginManager {
         if (typeof version !== 'string') {
             const packageInfo = this.getInfo(packageName);
 
-            version ??= packageInfo.version;
+            version ??= packageInfo?.version ?? null;
         }
 
         const cwd = this.cwd();
