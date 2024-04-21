@@ -120,6 +120,8 @@ async function install (
     );
 
     await sapm.install(...packageNames);
+
+    updatePackageLockJSON();
 }
 
 
@@ -137,6 +139,8 @@ async function uninstall (
     );
 
     await sapm.uninstall(...packageNames);
+
+    updatePackageLockJSON();
 }
 
 
@@ -181,7 +185,9 @@ async function runSubcommand (
 
 
 async function exit (code = 0) {
-    updatePackageLockJSON();
+    if (code !== 0) {
+        updatePackageLockJSON();
+    }
 
     process.exit(code);
 }
