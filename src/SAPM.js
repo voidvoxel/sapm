@@ -178,16 +178,6 @@ class SAPM extends PluginManager {
     }
 
 
-    loaded () {
-        return { ...this._loaded };
-    }
-
-
-    packageJSON () {
-        return this._packageJSON;
-    }
-
-
     async install (...packageNames) {
         for (let packageName of packageNames) {
             await this._installPackage(packageName);
@@ -195,33 +185,13 @@ class SAPM extends PluginManager {
     }
 
 
-    _cd (dir) {
-        this._cwd = dir;
+    loaded () {
+        return { ...this._loaded };
     }
 
 
-    _loadAllDependencies () {
-        const dependencyMap = this._packageJSON.dependencies;
-
-        for (let name in dependencyMap) {
-            this._loadDependency(name);
-        }
-    }
-
-
-    _loadDependency (
-        name
-    ) {
-        if (typeof this._loaded[name] === 'object') {
-            return this._loaded[name];
-        }
-
-        return this._loaded[name] = super.require(name);
-    }
-
-
-    _setInstallPath (nodeModulesPath) {
-        this._nodeModulesPath = nodeModulesPath;
+    packageJSON () {
+        return this._packageJSON;
     }
 
 
@@ -254,6 +224,11 @@ class SAPM extends PluginManager {
             this.cwd(),
             packageJSON
         );
+    }
+
+
+    _cd (dir) {
+        this._cwd = dir;
     }
 
 
@@ -296,6 +271,31 @@ class SAPM extends PluginManager {
 
             await this._addDependency(packageName);
         }
+    }
+
+
+    _loadAllDependencies () {
+        const dependencyMap = this._packageJSON.dependencies;
+
+        for (let name in dependencyMap) {
+            this._loadDependency(name);
+        }
+    }
+
+
+    _loadDependency (
+        name
+    ) {
+        if (typeof this._loaded[name] === 'object') {
+            return this._loaded[name];
+        }
+
+        return this._loaded[name] = super.require(name);
+    }
+
+
+    _setInstallPath (nodeModulesPath) {
+        this._nodeModulesPath = nodeModulesPath;
     }
 }
 
