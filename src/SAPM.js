@@ -178,6 +178,11 @@ class SAPM extends PluginManager {
     }
 
 
+    /**
+     * Install one or more dependencies.
+     * @param  {...any} packageNames
+     * A list of all dependencies to install.
+     */
     async install (...packageNames) {
         for (let packageName of packageNames) {
             await this._installPackage(packageName);
