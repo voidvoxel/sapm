@@ -98,7 +98,7 @@ class SAPM extends PluginManager {
         this._setInstallPath(options.installPath);
 
         // Initialize the loaded package map.
-        this._installed = {};
+        this._loaded = {};
 
         // If the `package.json` file already exists, load it.
         // Otherwise, create a new one from the little knowledge we have.
@@ -178,6 +178,11 @@ class SAPM extends PluginManager {
     }
 
 
+    loaded () {
+        return { ...this._loaded };
+    }
+
+
     packageJSON () {
         return this._packageJSON;
     }
@@ -187,11 +192,6 @@ class SAPM extends PluginManager {
         for (let packageName of packageNames) {
             await this._installPackage(packageName);
         }
-    }
-
-
-    installed () {
-        return { ...this._installed };
     }
 
 
@@ -212,11 +212,11 @@ class SAPM extends PluginManager {
     _loadDependency (
         name
     ) {
-        if (typeof this._installed[name] === 'object') {
-            return this._installed[name];
+        if (typeof this._loaded[name] === 'object') {
+            return this._loaded[name];
         }
 
-        return this._installed[name] = super.require(name);
+        return this._loaded[name] = super.require(name);
     }
 
 
