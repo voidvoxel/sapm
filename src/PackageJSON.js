@@ -40,6 +40,7 @@ const path = require("path");
  * ```
  *
  * @since v0.1.0-alpha
+ * @version 0.1.0
  */
 class PackageJSON {
     static default () {
@@ -69,6 +70,7 @@ class PackageJSON {
      * then return `true`.
      * Otherwise return `false` in all other situations.
      * @since v0.1.0-alpha
+     * @version 0.1.0
      * @param {import("fs").PathLike} packagePath
      * @returns {boolean}
      * Whether or not the `package.json` file exists.
@@ -83,6 +85,7 @@ class PackageJSON {
     /**
      * Convert a JSON object into an `PackageJSON` instance.
      * @since v0.1.0-alpha
+     * @version 0.1.0
      * @param {*} json
      * The JSON object to clone.
      * @returns
@@ -110,6 +113,7 @@ class PackageJSON {
      * Parse the output of `PackageJSON#stringify` or `JSON#stringify` into an
      * instance of `PackageJSON`.
      * @since v0.1.0-alpha
+     * @version 0.1.0
      * @param {string} jsonString
      * A stringified `PackageJSON`.
      * This is the same as if you had read the text contents of a
@@ -126,6 +130,7 @@ class PackageJSON {
     /**
      * Read a local `package.json` file (synchronously).
      * @since v0.1.0-alpha
+     * @version 0.1.0
      * @param {import('fs').PathLike} packagePath
      * The path to the `package.json` file.
      * @returns {PackageJSON}
@@ -146,6 +151,7 @@ class PackageJSON {
     /**
      * Resolve a path to a `package.json` file.
      * @since v0.1.0-alpha
+     * @version 0.1.0
      * @param {string} packagePath
      * The `package.json` path to resolve.
      * @returns {string} The resolved path.
@@ -177,6 +183,7 @@ class PackageJSON {
      * see the documentation of the asynchronous version of this API:
      * `SAPM#writeFile`.
      * @since v0.1.0-alpha
+     * @version 0.1.0
      * @param {string} packagePath
      * The path to the package to write the `package.json` to.
      * @param {PackageJSON} packageJSON
@@ -200,6 +207,7 @@ class PackageJSON {
      * Convert a `PackageJSON` instance into a JSON string.
      * Almost identical in function to `JSON::stringify`.
      * @since v0.1.0-alpha
+     * @version 0.1.0
      * @param {PackageJSON} packageJSON
      * The `PackageJSON` to stringify.
      * @returns {string}
@@ -227,6 +235,7 @@ class PackageJSON {
      * ```
      *
      * @since v0.1.0-alpha
+     * @version 0.1.0
      * @param {string} name
      * The name of the package (i.e. `foo-bar` or `@you/your-own-app`).
      * @param {IPackageJSON} options
@@ -247,6 +256,7 @@ class PackageJSON {
      * Add a new dependency to the `PackageJSON` without downloading or
      * installing any packages.
      * @since v0.1.0-alpha
+     * @version 0.1.0
      * @param {string} packageName
      * The name of the package to add.
      * @param {string} version
@@ -263,6 +273,7 @@ class PackageJSON {
     /**
      * Get the name of this package.
      * @since v0.1.0-alpha
+     * @version 0.1.0
      * @returns {string}
      * The name of this package.
      */
@@ -274,6 +285,7 @@ class PackageJSON {
     /**
      * Get the version of this package.
      * @since v0.1.0-alpha
+     * @version 0.1.0
      * @returns {string}
      * The version of this package.
      */
@@ -285,6 +297,7 @@ class PackageJSON {
     /**
      * Remove a package from the dependencies list.
      * @since v0.1.0-alpha
+     * @version 0.1.0
      * @param {string} packageName
      * The name of the package to remove.
      */
@@ -296,6 +309,7 @@ class PackageJSON {
     /**
      * Stringify this `PackageJSON`.
      * @since v0.1.0-alpha
+     * @version 0.1.0
      * @param {((this: any, key: string, value: any) => any)} replacer
      * @param {number | string} space
      * @returns
