@@ -185,6 +185,11 @@ class SAPM extends PluginManager {
     }
 
 
+    /**
+     * Get a list of all packages currently loaded into memory.
+     * @returns {*[]}
+     * A list of all loaded packages.
+     */
     loaded () {
         return { ...this._loaded };
     }
