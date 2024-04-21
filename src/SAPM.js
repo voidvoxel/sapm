@@ -278,6 +278,21 @@ class SAPM extends PluginManager {
 
 
     /**
+     * Uninstall one or more dependencies.
+     *
+     * @since v0.1.0-alpha
+     * @version 0.1.0
+     * @param  {...any} packageNames
+     * A list of all dependencies to uninstall.
+     */
+    async uninstall (...packageNames) {
+        for (let packageName of packageNames) {
+            await this.#uninstallPackage(packageName);
+        }
+    }
+
+
+    /**
      * Add a package as a dependency.
      *
      * @private
@@ -425,6 +440,29 @@ class SAPM extends PluginManager {
 
 
     /**
+     * Add a package as a dependency.
+     *
+     * @private
+     * @since v0.1.0-alpha
+     * @version 0.1.0
+     * @param {string} packageName
+     * The name of the package to add as a dependency.
+     * @private
+     */
+    async #removeDependency (packageName) {const cwd = this.cwd();
+
+        const packageJSON = this.packageJSON();
+
+        packageJSON.removeDependency(packageName);
+
+        PackageJSON.writeFileSync(
+            this.cwd(),
+            packageJSON
+        );
+    }
+
+
+    /**
      * Set the path to install packages into
      * (Usually, this is `node_modules`).
      *
@@ -435,6 +473,28 @@ class SAPM extends PluginManager {
      */
     #setInstallPath (installPath) {
         this.#installPath = installPath;
+    }
+
+
+    /**
+     * Uninstall a single package as a dependency.
+     *
+     * @private
+     * @since v0.1.0-alpha
+     * @version 0.1.0
+     * @param {string} packageName
+     * The name of the package.
+     * @param {string?} version
+     * The earliest required version of the package.
+     * The version that this sapm decides on must be compatible with the
+     * version that you're trying to uninstall.
+     */
+    async #uninstallPackage (
+        packageName,
+    ) {
+        await super.uninstall(packageName);
+
+        await this.#removeDependency(packageName);
     }
 }
 
