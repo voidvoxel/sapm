@@ -4,8 +4,17 @@ const path = require('path');
 
 
 class SAPM extends PluginManager {
-    constructor (options = {}) {
-        options.cwd ??= process.cwd();
+    constructor (
+        packagePath,
+        options = {}
+    ) {
+        if (packagePath.endsWith('package.json')) {
+            packagePath = path.dirname(packagePath);
+        }
+
+        options.cwd = packagePath ??= process.cwd();
+
+        const cwd = options.cwd;
 
         options.installPath ??= path.resolve(
             path.join(
@@ -14,22 +23,65 @@ class SAPM extends PluginManager {
             )
         );
 
-        options.pluginsPath
-            = options.installPath
-                ?? options.cwd + "node_modules";
+        options.pluginsPath = options.installPath;
+
+        delete options.installPath;
+
+        let defaultPackageName = packagePath
+            .replace('\\', '/')
+            .split('/');
+
+        defaultPackageName = defaultPackageName[defaultPackageName.length - 1];
+
+        console.log(defaultPackageName);
 
         super(options);
 
-        this._cwd = options.cwd;
+        this.cd(cwd);
 
         this._setInstallPath(options.installPath);
+
+        this._installed = {};
+
+        if (PackageJSON.existsSync(cwd)) {
+            // TODO: Call `await PackageJSON.readFile(...)` instead.
+            this._packageJSON = PackageJSON.readFileSync(cwd);
+        } else {
+            this._packageJSON = PackageJSON.from(
+                {
+                    name: defaultPackageName,
+                    version: PackageJSON.default().version,
+                    main: PackageJSON.default().main
+                }
+            );
+        }
     }
 
 
-    async install (...packageNames) {
-        for (let packageName of packageNames) {
-            this._installPackage(packageName);
-        }
+    /**
+     * If version `version` of `name` is met, returns `true`.
+     * Returns `false` in all other cases.
+     * @param {string} name
+     * The name of the package that you would like to test for.
+     * @param {string} version
+     * The version you would like to test for.
+     * @param {"satisfies" | "satisfiesOrGreater"} mode
+     * Which mode to use when checking if the version requirement is met.
+     * @returns {boolean}
+     * Whether or not the package is installed.
+     */
+    alreadyInstalled (
+        name,
+        version,
+        mode
+    ) {
+        return typeof super.alreadyInstalled(
+            name,
+            version,
+            mode
+        ) === 'object'
+            || this._installed[name] === 'object'
+            || false;
     }
 
 
@@ -58,6 +110,53 @@ class SAPM extends PluginManager {
     }
 
 
+    /**
+     * Get the name of the package being modified.
+     * @returns {string}
+     * The name of the package.
+     */
+    getPackageName () {
+        return this._packageJSON.name;
+    }
+
+
+    packageJSON () {
+        return this._packageJSON;
+    }
+
+
+    async install (...packageNames) {
+        for (let packageName of packageNames) {
+            await this._installPackage(packageName);
+        }
+    }
+
+
+    installed () {
+        return { ...this._installed };
+    }
+
+
+    _loadAllDependencies () {
+        const dependencyMap = this._packageJSON.dependencies;
+
+        for (let name in dependencyMap) {
+            this._loadDependency(name);
+        }
+    }
+
+
+    _loadDependency (
+        name
+    ) {
+        if (typeof this._installed[name] === 'object') {
+            return this._installed[name];
+        }
+
+        return this._installed[name] = super.require(name);
+    }
+
+
     _setInstallPath (nodeModulesPath) {
         this._nodeModulesPath = nodeModulesPath;
     }
@@ -70,14 +169,18 @@ class SAPM extends PluginManager {
      * @private
      */
     async _addDependency (
-        packageName
+        packageName,
+        version
     ) {
-        const packageInfo = this.getInfo(packageName);
+        if (typeof version !== 'string') {
+            const packageInfo = this.getInfo(packageName);
 
-        const version = packageInfo.version;
+            version ??= packageInfo.version;
+        }
 
-        // TODO: Call `await PackageJSON.readFile(...)` instead.
-        const packageJSON = PackageJSON.readFileSync(this.cwd());
+        const cwd = this.cwd();
+
+        const packageJSON = this.packageJSON();
 
         packageJSON.addDependency(
             packageName,
@@ -115,6 +218,7 @@ class SAPM extends PluginManager {
         }
 
         if (typeof version === 'string') {
+
             await super.install(
                 packageName,
                 version

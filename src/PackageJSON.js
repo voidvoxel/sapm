@@ -8,6 +8,35 @@ const path = require("path");
 
 
 class PackageJSON {
+    static default () {
+        if (this.packageJSON) {
+            return this.packageJSON;
+        }
+
+        const packageJSON = {
+            name: 'example',
+            version: '0.0.0',
+            main: "src/index.js",
+            dependencies: {},
+            devDependencies: {}
+        };
+
+        Object.setPrototypeOf(
+            packageJSON,
+            PackageJSON
+        );
+
+        return packageJSON;
+    }
+
+
+    static existsSync (packagePath) {
+        packagePath = PackageJSON.resolve(packagePath);
+
+        return existsSync(packagePath);
+    }
+
+
     static from (json) {
         const packageJSON = new PackageJSON();
 
@@ -30,7 +59,7 @@ class PackageJSON {
     static parse (jsonString) {
         const json = JSON.parse(jsonString);
 
-        return new PackageJSON(json);
+        return PackageJSON.from(json);
     }
 
 
@@ -42,6 +71,24 @@ class PackageJSON {
      * The read `package.json` file.
      */
     static readFileSync (packagePath) {
+        packagePath = PackageJSON.resolve(packagePath);
+
+        const jsonString = readFileSync(
+            packagePath,
+            'utf-8'
+        );
+
+        return PackageJSON.parse(jsonString);
+    }
+
+
+    /**
+     * Resolve a path to a `package.json` file.
+     * @param {string} packagePath
+     * The `package.json` path to resolve.
+     * @returns {string} The resolved path.
+     */
+    static resolve (packagePath) {
         const fileName = "package.json";
 
         if (
@@ -54,18 +101,9 @@ class PackageJSON {
                     fileName
                 )
             );
-
-            return PackageJSON.readFileSync(packagePath);
         }
 
-        const jsonString = readFileSync(
-            packagePath,
-            'utf-8'
-        );
-
-        const json = JSON.parse(jsonString);
-
-        return PackageJSON.from(json);
+        return packagePath;
     }
 
 
@@ -73,25 +111,11 @@ class PackageJSON {
         packagePath,
         packageJSON
     ) {
-        const fileName = "package.json";
-
-        if (!packagePath.endsWith(fileName)) {
-            packagePath = path.resolve(
-                path.join(
-                    packagePath,
-                    "package.json"
-                )
-            );
-
-            return PackageJSON.writeFileSync(
-                packagePath,
-                packageJSON
-            );
-        }
+        packagePath = PackageJSON.resolve(packagePath);
 
         return writeFileSync(
             packagePath,
-            packageJSON.stringify(),
+            PackageJSON.stringify(packageJSON) + '\n',
             'utf-8'
         );
     }
@@ -103,6 +127,18 @@ class PackageJSON {
         } else {
             return JSON.stringify(packageJSON);
         }
+    }
+
+
+    constructor (
+        name,
+        options = {}
+    ) {
+        this.name = name;
+        this.main = options.main ?? PackageJSON.default().main;
+        this.version = options.version ?? PackageJSON.default().version;
+        this.dependencies = options.dependencies ?? PackageJSON.default().dependencies;
+        this.devDependencies = options.devDependencies ?? PackageJSON.default().devDependencies;
     }
 
 
