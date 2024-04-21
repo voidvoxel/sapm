@@ -1,8 +1,14 @@
 {
   "name": "sapm",
-  "version": "0.1.0-alpha.1",
-  "description": "Silver Ant Package Manager | Distributed package manager for JavaScript",
   "main": "src/index.js",
+  "version": "0.1.0-alpha.1",
+  "dependencies": {
+    "live-plugin-manager": "^0.19.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "description": "Silver Ant Package Manager | Distributed package manager for JavaScript",
   "bin": {
     "sapm": "bin/sapm.js"
   },
@@ -23,11 +29,5 @@
     "peer"
   ],
   "author": "Ashlynne Juniper",
-  "license": "MPL-2.0",
-  "dependencies": {
-    "live-plugin-manager": "^0.19.0"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0"
-  }
+  "license": "MPL-2.0"
 }
