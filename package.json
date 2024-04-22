@@ -8,7 +8,7 @@
   "devDependencies": {
     "jest": "^29.7.0"
   },
-  "description": "Silver Ant Package Manager | Distributed package manager for JavaScript",
+  "description": "Silver Ant Package Manager | Distributed | JavaScript/TypeScript",
   "bin": {
     "sapm": "bin/sapm.js"
   },
