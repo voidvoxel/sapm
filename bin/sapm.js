@@ -65,6 +65,7 @@ const VALID_SUBCOMMANDS = [
 ];
 
 
+// TODO: Use JSON.parse(JSON.stringify(object)) to organize this array.
 const VALID_NPM_SUBCOMMANDS = [
     'access', 'adduser', 'audit', 'bugs', 'cache', 'ci', 'completion',
     'config', 'dedupe', 'deprecate', 'diff', 'dist-tag', 'docs', 'doctor',
@@ -75,7 +76,7 @@ const VALID_NPM_SUBCOMMANDS = [
     'query', 'rebuild', 'repo', 'restart', 'root', 'run-script', 'sbom',
     'search', 'set', 'shrinkwrap', 'star', 'stars', 'start', 'stop', 'team',
     'test', 'token', 'uninstall', 'unpublish', 'unstar', 'update', 'version',
-    'view', 'whoami'
+    'view', 'whoami', 'run'
 ];
 
 
@@ -309,6 +310,30 @@ async function version (v) {
 }
 
 
+async function npm (
+    args
+) {
+    try {
+        const command = "npm " + args.join(' ');
+
+        const execArgs = {
+            stdio: [
+                'inherit',
+                'inherit',
+                'inherit'
+            ]
+        };
+
+        await exec(
+            command,
+            execArgs
+        );
+    } catch (error) {
+        await exit(1);
+    }
+}
+
+
 async function runSubcommand (
     subcommand,
     args
@@ -325,26 +350,9 @@ async function runSubcommand (
         const npmArgs = process.argv.splice(2);
 
         if (isValidSubcommandNpm(subcommand)) {
-            try {
-                const command = "npm " + npmArgs.join(' ');
+            npm(npmArgs);
 
-                const execArgs = {
-                    stdio: [
-                        'inherit',
-                        'inherit',
-                        'inherit'
-                    ]
-                };
-
-                await exec(
-                    command,
-                    execArgs
-                );
-            } catch (error) {
-                logUsage();
-
-                await exit(1);
-            }
+            return;
         }
 
         logUsage();
