@@ -65,6 +65,20 @@ const VALID_SUBCOMMANDS = [
 ];
 
 
+const VALID_NPM_SUBCOMMANDS = [
+    'access', 'adduser', 'audit', 'bugs', 'cache', 'ci', 'completion',
+    'config', 'dedupe', 'deprecate', 'diff', 'dist-tag', 'docs', 'doctor',
+    'edit', 'exec', 'explain', 'explore', 'find-dupes', 'fund', 'get', 'help',
+    'help-search', 'hook', 'init', 'install', 'install-ci-test',
+    'install-test', 'link', 'll', 'login', 'logout', 'ls', 'org', 'outdated',
+    'owner', 'pack', 'ping', 'pkg', 'prefix', 'profile', 'prune', 'publish',
+    'query', 'rebuild', 'repo', 'restart', 'root', 'run-script', 'sbom',
+    'search', 'set', 'shrinkwrap', 'star', 'stars', 'start', 'stop', 'team',
+    'test', 'token', 'uninstall', 'unpublish', 'unstar', 'update', 'version',
+    'view', 'whoami'
+];
+
+
 const VALID_OPTIONS = [];
 
 for (let optionName in PARSE_ARGS_OPTIONS) {
@@ -80,6 +94,11 @@ for (let optionName in PARSE_ARGS_OPTIONS) {
 
 function isValidSubcommand (subcommand) {
     return VALID_SUBCOMMANDS.includes(subcommand);
+}
+
+
+function isValidSubcommandNpm (subcommand) {
+    return VALID_NPM_SUBCOMMANDS.includes(subcommand);
 }
 
 
@@ -101,7 +120,7 @@ function sapmInstallDir () {
 const PARSE_ARGS_CONFIG = {
     args: [],
     options: PARSE_ARGS_OPTIONS,
-    strict: true,
+    strict: false,
     allowPositionals: true,
     tokens: false
 }
@@ -278,14 +297,12 @@ async function version (v) {
             execOptions
         );
     } catch (error) {
-        error.message = error.message
-        .replaceAll("npm", "sapm");
+        error.message = error.message.replaceAll("npm", "sapm");
 
-        console.log("[Error]", error.message);
-        console.log("[Error]", "Troubleshooting:");
-        console.log("[Error]", "Ensure that your Git repo has no unstaged changes.");
-        console.log("[Error]", "If that doesn't help, installing `npm` may resolve the issue.");
-        console.log("[Error]", "This is because `sapm` stubs are forwarded directly to `npm` as a fallback.");
+        console.log("Error:", error.message);
+        console.log("    Ensure that your Git repo has no unstaged changes.");
+        console.log("    If that doesn't help, installing `npm` may resolve the issue.");
+        console.log("    This is because `sapm` stubs are forwarded directly to `npm` as a fallback.");
 
         await exit(1);
     }
@@ -304,13 +321,22 @@ async function runSubcommand (
         await logVersion();
         await exit();
     }
+    if (!isValidSubcommand(subcommand)) {
+        const npmArgs = process.argv.splice(2);
 
-    const noPositionals = args.positionals.length === 0;
+        if (isValidSubcommandNpm(subcommand)) {
+            try {
+                await exec("npm " + npmArgs.join(' '));
+            } catch (error) {
+                logUsage();
 
-    if (noPositionals && !isValidSubcommand(subcommand)) {
+                await exit(1);
+            }
+        }
+
         logUsage();
 
-        return;
+        await exit(1);
     }
 
     switch (subcommand) {
@@ -318,6 +344,17 @@ async function runSubcommand (
             logUsage();
 
             return;
+        }
+
+        case 'h':
+        case 'help': {
+            logUsage();
+            await exit();
+        }
+
+        case 'usage': {
+            logUsage();
+            await exit();
         }
 
         case 'i':
