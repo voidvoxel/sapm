@@ -265,9 +265,29 @@ async function uninstall (
  */
 async function version (v) {
     try {
-        await exec(`npm version ${v}`);
-    } catch {
-        throw new Error("Not` yet implemented.");
+        const execOptions = {
+            stdio: [
+                'ignore',
+                'ignore',
+                'ignore'
+            ]
+        };
+
+        await exec(
+            `npm version ${v}`,
+            execOptions
+        );
+    } catch (error) {
+        error.message = error.message
+        .replaceAll("npm", "sapm");
+
+        console.log("[Error]", error.message);
+        console.log("[Error]", "Troubleshooting:");
+        console.log("[Error]", "Ensure that your Git repo has no unstaged changes.");
+        console.log("[Error]", "If that doesn't help, installing `npm` may resolve the issue.");
+        console.log("[Error]", "This is because `sapm` stubs are forwarded directly to `npm` as a fallback.");
+
+        await exit(1);
     }
 }
 
@@ -337,7 +357,7 @@ async function runSubcommand (
         case 'version': {
             const positionals = args.positionals;
 
-            for (let positional in positionals) {
+            for (let positional of positionals) {
                 await version(positional);
             }
 
