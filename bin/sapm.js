@@ -166,6 +166,17 @@ function logSubcommandUsage (subcommand) {
 }
 
 
+async function logVersion () {
+    const packageJSON = PackageJSON.readFileSync(SAPM_PACKAGE_PATH);
+
+    let installDir = sapmInstallDir();
+
+    console.log(`${packageJSON.name} ${packageJSON.version}`);
+    console.log(`${packageJSON.description}`);
+    console.log(`sapm install path: ${installDir}`);
+}
+
+
 async function install (
     options = {},
     ...packageNames
@@ -243,14 +254,21 @@ async function uninstall (
 }
 
 
-async function version () {
-    const packageJSON = PackageJSON.readFileSync(SAPM_PACKAGE_PATH);
-
-    let installDir = sapmInstallDir();
-
-    console.log(`${packageJSON.name} ${packageJSON.version}`);
-    console.log(`${packageJSON.description}`);
-    console.log(`sapm install path: ${installDir}`);
+/**
+ * Update the package's version.
+ *
+ * @param {'major'|'minor'|'patch'|'premajor'|'preminor'|'prepatch'|
+ * 'prerelease'|'from-git'|string
+ * } v
+ * Either a version number or a string containing the part of the version to
+ * increment (e.g. `'major'`, `'patch'`, `'prerelease'`, etc.).
+ */
+async function version (v) {
+    try {
+        await exec(`npm version ${v}`);
+    } catch {
+        throw new Error("Not` yet implemented.");
+    }
 }
 
 
@@ -263,7 +281,8 @@ async function runSubcommand (
     } else if (args.values['usage']) {
         subcommand = 'usage';
     } else if (args.values['version'] || args.values['v']) {
-        subcommand = 'version';
+        await logVersion();
+        await exit();
     }
 
     const noPositionals = args.positionals.length === 0;
@@ -315,9 +334,12 @@ async function runSubcommand (
             return;
         }
 
-        case 'v':
         case 'version': {
-            await version();
+            const positionals = args.positionals;
+
+            for (let positional in positionals) {
+                await version(positional);
+            }
 
             return;
         }
