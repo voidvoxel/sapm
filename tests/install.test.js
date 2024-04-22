@@ -87,7 +87,54 @@ test(
 
         expect(installedVersionMajor).toBe(versionMajor);
         expect(installedVersionMinor).toBeGreaterThanOrEqual(versionMinor);
+    }
+);
 
-        finalize();
+
+test(
+    "install a local package with a relative path",
+    async () => {
+        await initialize();
+
+        const sapm = new SAPM(TEST_INSTALL_PATH);
+
+        const sapmPackageJSON = PackageJSON.readFileSync('.');
+
+        const packageName = '.';
+        const version = sapmPackageJSON.version;
+
+        const versionSplit = version.split('.');
+
+        const versionMajor = Number.parseInt(versionSplit[0]);
+        const versionMinor = Number.parseInt(versionSplit[1]);
+
+        await sapm.install(packageName);
+
+        const installSuccessful = sapm.alreadyInstalled(packageName)
+
+        expect(installSuccessful).toBe(true);
+
+        const packageJSON = PackageJSON.readFileSync(
+            path.resolve(
+                path.join(
+                    TEST_INSTALL_PATH,
+                    "node_modules",
+                    "moment"
+                )
+            )
+        );
+
+        expect(packageJSON.hasOwnProperty('name')).toBe(true);
+        expect(packageJSON.hasOwnProperty('version')).toBe(true);
+
+        expect(packageJSON.name).toBe(packageName);
+
+        const installedVersionSplit = packageJSON.version.split('.');
+
+        const installedVersionMajor = Number.parseInt(installedVersionSplit[0]);
+        const installedVersionMinor = Number.parseInt(installedVersionSplit[1]);
+
+        expect(installedVersionMajor).toBe(versionMajor);
+        expect(installedVersionMinor).toBeGreaterThanOrEqual(versionMinor);
     }
 );
