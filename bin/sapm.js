@@ -30,6 +30,10 @@ const PARSE_ARGS_OPTIONS = {
         type: 'boolean',
         short: 'g',
         default: false
+    },
+    'usage': {
+        type: 'boolean',
+        default: false
     }
 };
 
