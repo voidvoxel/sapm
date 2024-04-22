@@ -6,9 +6,19 @@ const { parseArgs } = require('util');
 
 
 const SAPM = require('..');
+const PackageJSON = require('../src/PackageJSON');
+const path = require('path');
 
 
 let sapm = null;
+
+
+const SAPM_PACKAGE_PATH = path.resolve(
+    path.join(
+        __dirname,
+        ".."
+    )
+);
 
 
 const PARSE_ARGS_OPTIONS = {
@@ -34,8 +44,46 @@ const PARSE_ARGS_OPTIONS = {
     'usage': {
         type: 'boolean',
         default: false
+    },
+    'version': {
+        type: 'boolean',
+        short: 'v',
+        default: false
     }
 };
+
+
+const VALID_SUBCOMMANDS = [];
+
+for (let optionName in PARSE_ARGS_OPTIONS) {
+    VALID_SUBCOMMANDS.push(optionName);
+
+    if (PARSE_ARGS_OPTIONS[optionName].short) {
+        const shortOptionName = PARSE_ARGS_OPTIONS[optionName].short;
+
+        VALID_SUBCOMMANDS.push(shortOptionName);
+    }
+}
+
+
+function isValidSubcommand (subcommand) {
+    return VALID_SUBCOMMANDS.includes(subcommand);
+}
+
+
+function sapmInstallDir () {
+    if (typeof this._installDir === 'string') {
+        return this._installDir;
+    }
+
+    this._installDir = path.resolve(
+        path.dirname(
+            process.argv[1]
+        )
+    );
+
+    return this._installDir = this._installDir.substring(0, this._installDir.length - 4);
+}
 
 
 const PARSE_ARGS_CONFIG = {
@@ -119,6 +167,12 @@ async function install (
         exit();
     }
 
+    if (packageNames.length === 0) {
+        logUsage();
+
+        return;
+    }
+
     const packagePath = options.cwd ?? process.cwd();
 
     sapm = new SAPM(
@@ -138,6 +192,12 @@ async function uninstall (
     options = {},
     ...packageNames
 ) {
+    if (packageNames.length === 0) {
+        logUsage();
+
+        return;
+    }
+
     const packagePath = options.cwd ?? process.cwd();
 
     sapm = new SAPM(
@@ -153,14 +213,35 @@ async function uninstall (
 }
 
 
+async function version () {
+    const packageJSON = PackageJSON.readFileSync(SAPM_PACKAGE_PATH);
+
+    let installDir = sapmInstallDir();
+
+    console.log(`${packageJSON.name} ${packageJSON.version}`);
+    console.log(`${packageJSON.description}`);
+    console.log(`sapm install path: ${installDir}`);
+}
+
+
 async function runSubcommand (
     subcommand,
     args
 ) {
-    if (args.values['help']) {
+    if (args.values['help'] || args.values['h']) {
         subcommand = 'help';
     } else if (args.values['usage']) {
         subcommand = 'usage';
+    } else if (args.values['version'] || args.values['v']) {
+        subcommand = 'version';
+    }
+
+    const noPositionals = args.positionals.length === 0;
+
+    if (noPositionals && !isValidSubcommand(subcommand)) {
+        logUsage();
+
+        return;
     }
 
     switch (subcommand) {
@@ -195,6 +276,13 @@ async function runSubcommand (
 
             return;
         }
+
+        case 'v':
+        case 'version': {
+            await version();
+
+            return;
+        }
     }
 }
 
@@ -218,13 +306,7 @@ async function updatePackageLockJSON () {
 
 
 async function main (args) {
-    if (args.positionals.length === 0) {
-        logUsage();
-
-        return;
-    }
-
-    const subcommand = args.positionals[0];
+    const subcommand = args.positionals[0] ?? 'help';
 
     args.positionals = args.positionals.splice(1);
 
