@@ -2,7 +2,9 @@
 
 
 const { execSync } = require('child_process');
-const { parseArgs } = require('util');
+const { parseArgs, promisify } = require('util');
+
+const exec = promisify(execSync);
 
 
 const SAPM = require('..');
@@ -53,15 +55,25 @@ const PARSE_ARGS_OPTIONS = {
 };
 
 
-const VALID_SUBCOMMANDS = [];
+const VALID_SUBCOMMANDS = [
+    'help', '?',
+    'install', 'i',
+    'shrinkwrap',
+    'uninstall', 'un',
+    'usage',
+    'version'
+];
+
+
+const VALID_OPTIONS = [];
 
 for (let optionName in PARSE_ARGS_OPTIONS) {
-    VALID_SUBCOMMANDS.push(optionName);
+    VALID_OPTIONS.push(optionName);
 
     if (PARSE_ARGS_OPTIONS[optionName].short) {
         const shortOptionName = PARSE_ARGS_OPTIONS[optionName].short;
 
-        VALID_SUBCOMMANDS.push(shortOptionName);
+        VALID_OPTIONS.push(shortOptionName);
     }
 }
 
@@ -163,8 +175,8 @@ async function install (
     // If `sapm i --package-lock-only` was called,
     // then update `package-lock.json` and exit early.
     if (packageLockOnly) {
-        updatePackageLockJSON();
-        exit();
+        await updatePackageLockJSON();
+        await exit();
     }
 
     if (packageNames.length === 0) {
@@ -184,7 +196,25 @@ async function install (
 
     await sapm.install(...packageNames);
 
-    updatePackageLockJSON();
+    await updatePackageLockJSON();
+}
+
+
+async function shrinkwrap (
+    options = {}
+) {
+    const packagePath = options.cwd ?? process.cwd();
+
+    sapm = new SAPM(
+        packagePath,
+        {
+            installPath: options.installPath ?? null
+        }
+    );
+
+    await sapm.shrinkwrap();
+
+    await updatePackageLockJSON();
 }
 
 
@@ -209,7 +239,7 @@ async function uninstall (
 
     await sapm.uninstall(...packageNames);
 
-    updatePackageLockJSON();
+    await updatePackageLockJSON();
 }
 
 
@@ -264,6 +294,14 @@ async function runSubcommand (
             return;
         }
 
+        case 'shrinkwrap': {
+            const options = args.values;
+
+            await shrinkwrap(options);
+
+            return;
+        }
+
         case 'un':
         case 'uninstall': {
             const options = args.values;
@@ -289,7 +327,7 @@ async function runSubcommand (
 
 async function exit (code = 0) {
     if (code !== 0) {
-        updatePackageLockJSON();
+        await updatePackageLockJSON();
     }
 
     process.exit(code);
@@ -298,9 +336,9 @@ async function exit (code = 0) {
 
 async function updatePackageLockJSON () {
     try {
-        execSync("npm i --package-lock-only");
+        await exec("npm i --package-lock-only");
     } catch {
-        execSync("sapm i --package-lock-only");
+        throw new Error("Not yet implemented.");
     }
 }
 
