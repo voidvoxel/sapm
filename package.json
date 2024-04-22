@@ -1,7 +1,7 @@
 {
   "name": "sapm",
   "main": "src/index.js",
-  "version": "0.1.0-alpha.5",
+  "version": "0.1.0",
   "dependencies": {
     "live-plugin-manager": "^0.19.0"
   },
