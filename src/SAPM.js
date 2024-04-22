@@ -1,6 +1,9 @@
 const { PluginManager } = require('live-plugin-manager');
 const PackageJSON = require('./PackageJSON');
 const path = require('path');
+const { execSync } = require('child_process');
+
+const exec = util.promisify(execSync);
 
 
 /**
@@ -248,6 +251,24 @@ class SAPM extends PluginManager {
         for (let packageName of packageNames) {
             await this.#installPackage(packageName);
         }
+    }
+
+
+    /**
+     * Lock down dependency versions for publishing.
+     *
+     * *It is highly recommended that you call this method **before**
+     * publishing.*
+     *
+     * @since v0.1.0-alpha.3
+     * @version 0.1.0
+     */
+    async shrinkwrap () {
+        // Update `package-lock.json`.
+        await exec("npm i --package-lock-only");
+
+        // Convert `package-lock.json` into `npm-shrinkwrap.json`.
+        await exec("npm shrinkwrap");
     }
 
 
