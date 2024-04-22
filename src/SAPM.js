@@ -97,7 +97,7 @@ class SAPM extends PluginManager {
      * Create a new `SAPM` instance.
      *
      * @since v0.1.0-alpha
-     * @version 0.1.0
+     * @version 0.1.1
      * @param {string} packagePath
      * The path to either the package directory or `package.json` file.
      * @param {*} options
@@ -130,7 +130,7 @@ class SAPM extends PluginManager {
 
         // Parse the default package name from the package path if none was
         // provided.
-        let defaultPackageName = packagePath
+        let defaultPackageName = path.resolve(packagePath)
             .replace('\\', '/')
             .split('/');
 
