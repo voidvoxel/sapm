@@ -326,7 +326,20 @@ async function runSubcommand (
 
         if (isValidSubcommandNpm(subcommand)) {
             try {
-                await exec("npm " + npmArgs.join(' '));
+                const command = "npm " + npmArgs.join(' ');
+
+                const execArgs = {
+                    stdio: [
+                        'inherit',
+                        'inherit',
+                        'inherit'
+                    ]
+                };
+
+                await exec(
+                    command,
+                    execArgs
+                );
             } catch (error) {
                 logUsage();
 
@@ -415,7 +428,12 @@ async function exit (code = 0) {
 
 async function updatePackageLockJSON () {
     try {
-        await exec("npm i --package-lock-only");
+        await exec(
+            "npm i --package-lock-only",
+            {
+                stdio: 'ignore'
+            }
+        );
     } catch {
         throw new Error("Not yet implemented.");
     }
