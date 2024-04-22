@@ -2,8 +2,9 @@ const { PluginManager } = require('live-plugin-manager');
 const PackageJSON = require('./PackageJSON');
 const path = require('path');
 const { execSync } = require('child_process');
+const { promisify } = require('util');
 
-const exec = util.promisify(execSync);
+const exec = promisify(execSync);
 
 
 /**
