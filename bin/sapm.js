@@ -442,8 +442,10 @@ async function updatePackageLockJSON () {
                 stdio: 'ignore'
             }
         );
-    } catch {
-        throw new Error("Not yet implemented.");
+    } catch (error) {
+        error.message = error.message.replaceAll('npm', 'sapm');
+
+        throw error;
     }
 }
 
