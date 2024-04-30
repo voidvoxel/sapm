@@ -3,6 +3,7 @@ const PackageJSON = require('./PackageJSON');
 const path = require('path');
 const { execSync } = require('child_process');
 const { promisify } = require('util');
+const { writeFile } = require('fs/promises');
 
 const exec = promisify(execSync);
 
@@ -315,7 +316,9 @@ class SAPM extends PluginManager {
 
 
     /**
-     * Add a package as a dependency.
+     * Add a package as a dependency without invoking `SAPM#install`.
+     * This allows you to add dependencies without downloading and running the
+     * install scripts for the dependency.
      *
      * @private
      * @since v0.1.0-alpha
@@ -381,6 +384,40 @@ class SAPM extends PluginManager {
         packageName,
         version = null
     ) {
+        let packagePath = null;
+
+        // If `packagePath` is a relative path, resolve it.
+        path.join(
+            this.cwd(),
+            PackageJSON.resolveShallow(packageName)
+        );
+
+        if (
+            packageName.includes('.')
+                || packageName.includes('/')
+                || packageName.includes('\\')
+        ) {
+            packageName = packageName.replaceAll('\\', '/');
+
+            if (PackageJSON.existsSync(packageName)) {
+                if (packageName.startsWith('.')) {
+                    packagePath = path.resolve(
+                        path.join(
+                            this.cwd(),
+                            packageName
+                        )
+                    );
+                } else {
+                    packagePath = path.resolve(packageName);
+                }
+
+                packageName = packagePath
+                    .replaceAll('\\', '/')
+                    .split('/')
+                    [packageName.length - 1];
+            }
+        }
+
         const isScoped = packageName.startsWith('@');
 
         let isNameVersioned;
@@ -401,6 +438,11 @@ class SAPM extends PluginManager {
         }
 
         if (typeof version === 'string') {
+            if (
+                version[0] >= '0' && version[0] <= '9'
+            ) {
+                version = '^' + version;
+            }
 
             await super.install(
                 packageName,
@@ -412,7 +454,15 @@ class SAPM extends PluginManager {
                 version
             );
         } else {
-            await super.install(packageName);
+            const packageInfo = await this.queryPackage(packageName, 'latest');
+
+            version = '^' + packageInfo.version;
+
+            if (packagePath !== null) {
+                await super.installFromPath(packagePath);
+            } else {
+                await super.install(packageName);
+            }
 
             await this.#addDependency(packageName);
         }
