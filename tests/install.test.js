@@ -100,7 +100,7 @@ test(
 
         const sapmPackageJSON = PackageJSON.readFileSync('.');
 
-        const packageName = '.';
+        const packageName = sapmPackageJSON.name;
         const version = sapmPackageJSON.version;
 
         const versionSplit = version.split('.');
@@ -108,9 +108,9 @@ test(
         const versionMajor = Number.parseInt(versionSplit[0]);
         const versionMinor = Number.parseInt(versionSplit[1]);
 
-        await sapm.install(packageName);
+        await sapm.install('../../..');
 
-        const installSuccessful = sapm.alreadyInstalled(packageName)
+        const installSuccessful = sapm.alreadyInstalled(packageName);
 
         expect(installSuccessful).toBe(true);
 
@@ -119,7 +119,7 @@ test(
                 path.join(
                     TEST_INSTALL_PATH,
                     "node_modules",
-                    "moment"
+                    "sapm"
                 )
             )
         );
