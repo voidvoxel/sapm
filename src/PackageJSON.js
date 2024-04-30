@@ -151,24 +151,34 @@ class PackageJSON {
     /**
      * Resolve a path to a `package.json` file.
      * @since v0.1.0-alpha
-     * @version 0.1.0
+     * @version 0.1.1
      * @param {string} packagePath
      * The `package.json` path to resolve.
      * @returns {string} The resolved path.
      */
     static resolve (packagePath) {
+        packagePath = path.resolve(packagePath);
+
+        return this.resolveShallow(packagePath);
+    }
+
+
+    /**
+     * Resolve a path to a `package.json` file.
+     * @since v0.1.0
+     * @version 0.1.0
+     * @param {string} packagePath
+     * The `package.json` path to resolve.
+     * @returns {string} The resolved path.
+     */
+    static resolveShallow (packagePath) {
         const fileName = "package.json";
 
-        if (
-            !existsSync(packagePath)
-                || !packagePath.endsWith(fileName)
-        ) {
-            packagePath = path.resolve(
-                path.join(
-                    packagePath,
-                    fileName
-                )
-            );
+        if (!packagePath.endsWith(fileName)) {
+            packagePath = path.join(
+                packagePath,
+                fileName
+            )
         }
 
         return packagePath;
