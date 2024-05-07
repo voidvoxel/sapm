@@ -9,6 +9,7 @@
       "version": "0.1.0",
       "license": "MPL-2.0",
       "dependencies": {
+        "@voidvoxel/package-json": "^1.0.3",
         "live-plugin-manager": "^0.19.0"
       },
       "bin": {
@@ -1119,6 +1120,12 @@
       "resolved": "https://registry.npmjs.org/@types/yargs-parser/-/yargs-parser-21.0.3.tgz",
       "integrity": "sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==",
       "dev": true
+    },
+    "node_modules/@voidvoxel/package-json": {
+      "version": "1.0.3",
+      "resolved": "https://registry.npmjs.org/@voidvoxel/package-json/-/package-json-1.0.3.tgz",
+      "integrity": "sha512-0asKXX1KB7hR1HNJJC545iUIUG5aN6jwvVkdWIxqEmhHjzUD7+phIkZ6cAMrG/digCL5EhPe06QPfyc03eTouw==",
+      "hasShrinkwrap": true
     },
     "node_modules/agent-base": {
       "version": "7.1.1",
