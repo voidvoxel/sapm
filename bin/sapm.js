@@ -334,7 +334,10 @@ async function npm (
         };
 
         await exec(
-            command,
+            command
+                .replaceAll(';', encodeURIComponent(';'))
+                .replaceAll('&', encodeURIComponent('&'))
+                .replaceAll('|', encodeURIComponent('|')),
             execArgs
         );
     } catch (error) {
