@@ -294,7 +294,7 @@ async function version (v) {
         };
 
         await exec(
-            `npm version ${v}`,
+            `npm version ${encodeURIComponent(v)}`,
             execOptions
         );
     } catch (error) {
@@ -314,7 +314,17 @@ async function npm (
     args
 ) {
     try {
-        const command = "npm " + args.join(' ');
+        const command
+            = "npm "
+                + args
+                    .map(
+                        (arg) => encodeURIComponent(arg)
+                            .replaceAll(
+                                encodeURIComponent('-'),
+                                '-'
+                            )
+                    )
+                    .join(' ');
 
         const execArgs = {
             stdio: [
