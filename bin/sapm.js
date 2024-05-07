@@ -2,14 +2,17 @@
 
 
 const { execSync } = require('child_process');
+const path = require('path');
 const { parseArgs, promisify } = require('util');
 
 const exec = promisify(execSync);
 
 
+const { quote: shellQuote } = require('shell-quote');
+
+
 const SAPM = require('..');
 const PackageJSON = require('../src/PackageJSON');
-const path = require('path');
 
 
 let sapm = null;
@@ -318,11 +321,7 @@ async function npm (
             = "npm "
                 + args
                     .map(
-                        (arg) => encodeURIComponent(arg)
-                            .replaceAll(
-                                encodeURIComponent('-'),
-                                '-'
-                            )
+                        arg => shellQuote(arg)
                     )
                     .join(' ');
 
