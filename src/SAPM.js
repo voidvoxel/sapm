@@ -1,5 +1,5 @@
 const { PluginManager } = require('live-plugin-manager');
-const PackageJSON = require('./PackageJSON');
+const PackageJSON = require('@voidvoxel/package-json');
 const path = require('path');
 const { execSync } = require('child_process');
 const { promisify } = require('util');
